@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Реєстрація - AutoReviews</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        padding-top: 50px;
+      }
+      form {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #218838;
+      }
+      h2 {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/register" method="POST">
+      <h2>Реєстрація</h2>
+
+      <label>Логін:</label>
+      <input type="text" name="login" required placeholder="Придумайте логін" />
+
+      <label>Пароль:</label>
+      <input
+        type="password"
+        name="password"
+        required
+        placeholder="Придумайте пароль"
+      />
+
+      <button type="submit">Зареєструватися</button>
+      <p style="text-align: center"><a href="/">На головну</a></p>
+    </form>
+  </body>
+</html>

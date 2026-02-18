@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Вхід - AutoReviews</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        padding-top: 50px;
+      }
+      form {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      h2 {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/login" method="POST">
+      <h2>Вхід</h2>
+
+      <label>Твій логін:</label>
+      <input type="text" name="login" required />
+
+      <label>Твій пароль:</label>
+      <input type="password" name="password" required />
+
+      <button type="submit">Увійти</button>
+      <p style="text-align: center">
+        <a href="/register.html">Немає акаунту?</a>
+      </p>
+    </form>
+  </body>
+</html>

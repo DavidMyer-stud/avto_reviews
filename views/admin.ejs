@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Адмін-панель</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between mb-4">
+        <h1>⚙️ Панель Адміністратора</h1>
+        <a href="/" class="btn btn-outline-secondary">На головну</a>
+    </div>
+
+    <div class="card shadow p-4 mb-5">
+        <h4>Додати нове авто</h4>
+        <form action="/admin/add" method="POST">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" name="brand" class="form-control" placeholder="Марка (напр. BMW)" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="model" class="form-control" placeholder="Модель (напр. X5)" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="image_url" class="form-control" placeholder="Фото (напр. /images/new.jpg)" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success mt-3 w-100">Додати в базу</button>
+            <small class="text-muted">Не забудьте закинути фото в папку <b>public/images</b>!</small>
+        </form>
+    </div>
+
+    <h4>Список авто в базі</h4>
+    <table class="table table-striped bg-white shadow-sm">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Фото</th>
+                <th>Назва</th>
+                <th>Дія</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% cars.forEach(function(car) { %>
+                <tr>
+                    <td><%= car.id %></td>
+                    <td><img src="<%= car.image_url %>" width="50"></td>
+                    <td><%= car.brand %> <%= car.model %></td>
+                    <td>
+                        <form action="/admin/delete/<%= car.id %>" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
