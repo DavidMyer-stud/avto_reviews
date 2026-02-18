@@ -19,9 +19,13 @@ app.use(
 const connection = mysql.createConnection({
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "12345", // Твій локальний пароль
+  password: process.env.DB_PASSWORD || "12345",
   database: process.env.DB_NAME || "avto_reviews",
   port: process.env.DB_PORT || 3306,
+  ssl: {
+    minVersion: "TLSv1.2",
+    rejectUnauthorized: true,
+  },
 });
 
 connection.connect((err) => {
@@ -292,6 +296,7 @@ app.post("/admin/delete-review/:id", (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log("Сервер працює: http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Сервер працює на порту ${PORT}`);
 });
