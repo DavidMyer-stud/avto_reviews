@@ -3,7 +3,6 @@ const mysql = require("mysql2");
 const session = require("express-session");
 const app = express();
 
-// Настройка шаблонизатора EJS
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
@@ -33,38 +32,29 @@ connection.connect((err) => {
   else console.log("БД підключена!");
 });
 
-// --- МАРШРУТЫ ---
-
-// ГЛАВНАЯ СТРАНИЦА (Самое важное изменение!)
-// 1. Главная страница (С ПОИСКОМ)
 app.get("/", (req, res) => {
-  // Получаем текст, который ввел пользователь (если есть)
   const searchText = req.query.search;
 
   let sql = "SELECT * FROM cars";
   let params = [];
 
-  // Если поиск НЕ пустой — меняем SQL запрос
   if (searchText) {
-    // LIKE %...% значит "содержит этот текст внутри"
     sql += " WHERE brand LIKE ? OR model LIKE ?";
-    const searchPattern = `%${searchText}%`; // Например: %BMW%
+    const searchPattern = `%${searchText}%`;
     params = [searchPattern, searchPattern];
   }
 
-  // Выполняем запрос (простой или с фильтром)
   connection.query(sql, params, (err, result) => {
     if (err) throw err;
 
     res.render("index", {
       cars: result,
       user: req.session.username,
-      searchStr: searchText || "", // Передаем текст обратно, чтобы он остался в поле ввода
+      searchStr: searchText || "",
     });
   });
 });
 
-// Регистрация
 app.post("/register", (req, res) => {
   const { login, password } = req.body;
   const sql = "INSERT INTO users (login, password) VALUES (?, ?)";
@@ -74,7 +64,6 @@ app.post("/register", (req, res) => {
   });
 });
 
-// Вход
 app.post("/login", (req, res) => {
   const { login, password } = req.body;
   const sql = "SELECT * FROM users WHERE login = ? AND password = ?";
@@ -89,69 +78,57 @@ app.post("/login", (req, res) => {
   });
 });
 
-// Выход
 app.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/");
 });
 
-// 1. Показать страницу с формой отзыва
 app.get("/review/:id", (req, res) => {
-  // Проверяем, вошел ли пользователь (неавторизованным нельзя писать!)
   if (!req.session.username) {
     return res.send(
       "Спочатку увійдіть у свій акаунт! <a href='/login.html'>Вхід</a>",
     );
   }
 
-  const carId = req.params.id; // Получаем ID машины из ссылки
+  const carId = req.params.id;
 
-  // Ищем машину в базе, чтобы узнать её название
   const sql = "SELECT * FROM cars WHERE id = ?";
   connection.query(sql, [carId], (err, result) => {
     if (err) throw err;
 
-    // Отдаем страницу review.ejs и передаем туда данные о машине
     res.render("review", { car: result[0] });
   });
 });
 
-// 1. Показать страницу с формой отзыва
 app.get("/review/:id", (req, res) => {
-  // Проверяем, вошел ли пользователь (неавторизованным нельзя писать!)
   if (!req.session.username) {
     return res.send(
       "Спочатку увійдіть у свій акаунт! <a href='/login.html'>Вхід</a>",
     );
   }
 
-  const carId = req.params.id; // Получаем ID машины из ссылки
+  const carId = req.params.id;
 
-  // Ищем машину в базе, чтобы узнать её название
   const sql = "SELECT * FROM cars WHERE id = ?";
   connection.query(sql, [carId], (err, result) => {
     if (err) throw err;
 
-    // Отдаем страницу review.ejs и передаем туда данные о машине
     res.render("review", { car: result[0] });
   });
 });
 
-// 2. Обработать отправку формы (Сохранить отзыв)
 app.post("/review/:id", (req, res) => {
   if (!req.session.username) return res.redirect("/login.html");
 
   const carId = req.params.id;
   const userId = req.session.userId;
 
-  // Добавили rating_reliability в список того, что мы ждем от формы
   const { rating_engine, rating_interior, rating_reliability, text } = req.body;
 
   const sql = `INSERT INTO reviews 
                  (user_id, car_id, text, rating_engine, rating_interior, rating_reliability) 
                  VALUES (?, ?, ?, ?, ?, ?)`;
 
-  // Теперь вместо цифры 5 подставляем реальную переменную rating_reliability
   connection.query(
     sql,
     [userId, carId, text, rating_engine, rating_interior, rating_reliability],
@@ -169,31 +146,26 @@ app.post("/review/:id", (req, res) => {
   );
 });
 
-// 3. Страница просмотра авто и отзывов (Самая умная часть)
 app.get("/car/:id", (req, res) => {
   const carId = req.params.id;
 
-  // Шаг 1: Получаем информацию о самой машине
   const sqlCar = "SELECT * FROM cars WHERE id = ?";
 
   connection.query(sqlCar, [carId], (err, carResult) => {
     if (err) throw err;
-    const car = carResult[0]; // Берем первую найденную машину
+    const car = carResult[0];
 
-    // Шаг 2: Получаем отзывы + ИМЕНА пользователей (JOIN)
-    // Мы говорим: "Соедини таблицу reviews и users, чтобы я узнал логин автора"
     const sqlReviews = `
             SELECT reviews.*, users.login 
             FROM reviews 
             JOIN users ON reviews.user_id = users.id 
             WHERE car_id = ?
             ORDER BY reviews.id DESC 
-        `; // DESC значит "сначала новые"
+        `;
 
     connection.query(sqlReviews, [carId], (err, reviewsResult) => {
       if (err) throw err;
 
-      // Отдаем страницу car.ejs и передаем туда и машину, и отзывы
       res.render("car", {
         car: car,
         reviews: reviewsResult,
