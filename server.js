@@ -65,13 +65,39 @@ app.get("/", (req, res) => {
 });
 
 // Регистрация
-app.post("/register", (req, res) => {
-  const { login, password } = req.body;
-  const sql = "INSERT INTO users (login, password) VALUES (?, ?)";
-  connection.query(sql, [login, password], (err) => {
-    if (err) res.send("Логін зайнятий!");
-    else res.redirect("/login.html");
-  });
+// Реєстрація (Тільки Логін + Пароль)
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+  const role = "user"; // 🛡️ Захист: ніхто не може сам стати адміном
+
+  try {
+    // 1. Перевірка: чи є вже такий username?
+    const [existingUsers] = await connection
+      .promise()
+      .query("SELECT * FROM users WHERE username = ?", [username]);
+
+    if (existingUsers.length > 0) {
+      // Якщо логін зайнятий — показуємо помилку
+      return res.render("register", { error: "Цей логін вже зайнятий!" });
+    }
+
+    // 2. Хешування пароля (безпека)
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. Створення користувача (без email)
+    await connection
+      .promise()
+      .query("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", [
+        username,
+        hashedPassword,
+        role,
+      ]);
+
+    res.redirect("/login");
+  } catch (err) {
+    console.error(err);
+    res.render("register", { error: "Помилка сервера" });
+  }
 });
 
 // Вход
